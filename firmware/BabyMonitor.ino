@@ -33,8 +33,8 @@
 #include <driver/gpio.h>
 
 // ─── WiFi / nettverksnavn ─────────────────────────────────────────────────────
-static const char* WIFI_SSID     = "DITT_WIFI_NAVN";     // ← endre til ditt nettverksnavn
-static const char* WIFI_PASS     = "DITT_WIFI_PASSORD";  // ← endre til ditt passord
+static const char* WIFI_SSID     = "ved rutern";
+static const char* WIFI_PASS     = "Banankasse123";
 static const char* MDNS_HOSTNAME = "babymonitor";        // http://babymonitor.local
 
 // ─── Kamera-pins (Freenove ESP32-S3 EYE – OV5640) ────────────────────────────
@@ -69,12 +69,12 @@ static const char* MDNS_HOSTNAME = "babymonitor";        // http://babymonitor.l
 
 // ─── Servo-pins og konfigurasjon (SG90) ───────────────────────────────────────
 #define SERVO_PIN      2    // GPIO2 – ledig, PWM-kapabel
-#define SERVO_CHANNEL  1    // LEDC-kanal (0 er i bruk av kamera)
 #define SERVO_FREQ    50    // 50 Hz – standard for RC-servoer
 #define SERVO_RES     16    // 16-bit oppløsning (0–65535)
 // SG90 pulsebredde: 0.5 ms (0°) → 2.4 ms (180°) ved 20 ms periode
-#define SERVO_MIN_DUTY 1638   // 0.5 ms / 20 ms × 65536
-#define SERVO_MAX_DUTY 7864   // 2.4 ms / 20 ms × 65536
+// 13-bit oppløsning (8192 counts): 0.5/20×8192=205, 2.4/20×8192=983
+#define SERVO_MIN_DUTY  205   // 0.5 ms
+#define SERVO_MAX_DUTY  983   // 2.4 ms
 
 static int servo_angle = 90;   // startposisjon: midten
 
@@ -95,15 +95,15 @@ static int servo_angle = 90;   // startposisjon: midten
 static void servo_set_angle(int angle) {
   angle = max(0, min(180, angle));
   servo_angle = angle;
-  int duty = SERVO_MIN_DUTY + (int)((float)angle / 180.0f * (SERVO_MAX_DUTY - SERVO_MIN_DUTY));
-  ledcWrite(SERVO_CHANNEL, duty);
+  uint32_t duty = SERVO_MIN_DUTY + (uint32_t)((float)angle / 180.0f * (SERVO_MAX_DUTY - SERVO_MIN_DUTY));
+  ledcWrite(SERVO_PIN, duty);
 }
 
 static bool servo_init() {
-  ledcSetup(SERVO_CHANNEL, SERVO_FREQ, SERVO_RES);
-  ledcAttachPin(SERVO_PIN, SERVO_CHANNEL);
-  servo_set_angle(90);   // senter
-  Serial.println("[SERVO] OK – SG90 GPIO2, startet på 90°");
+  // ledcAttachChannel: eksplisitt kanal 2 for å unngå konflikt med kameraets LEDC kanal 0
+  ledcAttachChannel(SERVO_PIN, SERVO_FREQ, 13, 2);
+  ledcWrite(SERVO_PIN, 0);   // ingen puls ved oppstart – unngår brownout
+  Serial.println("[SERVO] OK – SG90 GPIO2, 13-bit PWM, klar");
   return true;
 }
 
