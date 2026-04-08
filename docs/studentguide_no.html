@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BabyMonitor – Studentguide</title>
+<style>
+  :root {
+    --navy: #0d1b2a;
+    --teal: #1a7a7a;
+    --teal-light: #22a6a6;
+    --teal-faint: #e6f7f7;
+    --white: #ffffff;
+    --grey: #f4f6f8;
+    --text: #1a1a2e;
+    --warn-bg: #fff8e1;
+    --warn-border: #f9a825;
+    --danger-bg: #fdecea;
+    --danger-border: #c62828;
+    --success-bg: #e8f5e9;
+    --success-border: #2e7d32;
+    --info-bg: #e3f2fd;
+    --info-border: #1565c0;
+    --code-bg: #1e2a38;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--grey); color: var(--text); line-height: 1.7; }
+  header { background: var(--navy); color: var(--white); padding: 2.5rem 2rem 2rem; border-bottom: 4px solid var(--teal); }
+  header h1 { font-size: 1.9rem; margin-bottom: 0.4rem; }
+  header p { color: #a0b8c8; font-size: 1rem; }
+  header .repo-link { display: inline-block; margin-top: 1rem; background: var(--teal); color: white; padding: 0.4rem 1rem; border-radius: 5px; text-decoration: none; font-size: 0.9rem; }
+  header .repo-link:hover { background: var(--teal-light); }
+  .badge { display: inline-block; background: var(--teal); color: white; border-radius: 4px; padding: 2px 10px; font-size: 0.8rem; margin-left: 10px; vertical-align: middle; }
+  .container { max-width: 940px; margin: 2rem auto; padding: 0 1.2rem 4rem; }
+  .section { background: var(--white); border-radius: 10px; padding: 1.8rem 2rem; margin-bottom: 1.8rem; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  h2 { color: var(--navy); font-size: 1.3rem; margin-bottom: 1.2rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--teal-faint); display: flex; align-items: center; gap: 0.5rem; }
+  h3 { color: var(--teal); font-size: 1.05rem; margin: 1.4rem 0 0.6rem; }
+  h4 { color: var(--navy); font-size: 0.97rem; margin: 1rem 0 0.4rem; font-weight: 600; }
+  p { margin-bottom: 0.6rem; }
+  a { color: var(--teal); }
+  .step { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 0.8rem; padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #e0e8ee; }
+  .step:hover { background: var(--teal-faint); }
+  .step label { display: flex; gap: 0.8rem; align-items: flex-start; cursor: pointer; width: 100%; }
+  .step input[type=checkbox] { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--teal); flex-shrink: 0; cursor: pointer; }
+  .step input[type=checkbox]:checked + span { text-decoration: line-through; color: #888; }
+  .step span { flex: 1; }
+  .warn  { background: var(--warn-bg);    border-left: 4px solid var(--warn-border);    border-radius: 6px; padding: 0.9rem 1.1rem; margin: 1rem 0; }
+  .warn  strong { color: #e65100; }
+  .danger{ background: var(--danger-bg);  border-left: 4px solid var(--danger-border);  border-radius: 6px; padding: 0.9rem 1.1rem; margin: 1rem 0; }
+  .danger strong { color: var(--danger-border); }
+  .success{background: var(--success-bg); border-left: 4px solid var(--success-border); border-radius: 6px; padding: 0.9rem 1.1rem; margin: 1rem 0; }
+  .success strong { color: #2e7d32; }
+  .info  { background: var(--info-bg);    border-left: 4px solid var(--info-border);    border-radius: 6px; padding: 0.9rem 1.1rem; margin: 1rem 0; }
+  .info  strong { color: var(--info-border); }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; }
+  th { background: var(--navy); color: white; padding: 0.6rem 0.9rem; text-align: left; }
+  td { padding: 0.55rem 0.9rem; border-bottom: 1px solid #e0e8ee; vertical-align: top; }
+  tr:nth-child(even) td { background: var(--teal-faint); }
+  td code, th code { background: rgba(0,0,0,0.08); padding: 1px 5px; border-radius: 3px; font-size: 0.88rem; font-family: 'Consolas', monospace; }
+  details { margin: 0.8rem 0; border: 1px solid #ccdde8; border-radius: 6px; overflow: hidden; }
+  summary { background: var(--navy); color: white; padding: 0.75rem 1.1rem; cursor: pointer; font-weight: 600; font-size: 0.95rem; list-style: none; display: flex; align-items: center; gap: 0.5rem; user-select: none; }
+  summary::before { content: '▶'; font-size: 0.75rem; transition: transform 0.2s; }
+  details[open] summary::before { transform: rotate(90deg); }
+  pre { background: var(--code-bg); color: #c9d7e3; padding: 1.2rem 1.4rem; overflow-x: auto; font-size: 0.87rem; line-height: 1.65; }
+  code { font-family: 'Consolas', 'Courier New', monospace; }
+  .pin-table td:nth-child(2), .pin-table td:nth-child(3) { font-weight: bold; color: var(--teal); font-family: monospace; }
+  .num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: var(--teal); color: white; border-radius: 50%; font-weight: bold; font-size: 0.85rem; flex-shrink: 0; }
+  .toc { background: var(--teal-faint); border: 1px solid var(--teal); border-radius: 8px; padding: 1.2rem 1.5rem; margin-bottom: 1.8rem; }
+  .toc h3 { margin-top: 0; color: var(--navy); }
+  .toc ol { padding-left: 1.5rem; line-height: 2.2; }
+  .toc a { color: var(--teal); text-decoration: none; font-weight: 500; }
+  .toc a:hover { text-decoration: underline; }
+  .log-example { background: #1e2a38; color: #8fbc8f; padding: 0.8rem 1.2rem; border-radius: 5px; font-family: monospace; font-size: 0.83rem; margin: 0.8rem 0; overflow-x: auto; white-space: pre; }
+  .arch-box { background: var(--navy); color: #c9d7e3; border-radius: 8px; padding: 1.4rem 1.8rem; font-family: monospace; font-size: 0.9rem; line-height: 2; margin: 1rem 0; }
+  .arch-box .port { color: var(--teal-light); font-weight: bold; }
+  .arch-box .arrow { color: #f9a825; }
+  .insight { background: #f0f4f8; border: 1px solid #b0c8d8; border-radius: 8px; padding: 1.2rem 1.5rem; margin: 1.2rem 0; }
+  .insight h4 { color: var(--navy); margin-top: 0; margin-bottom: 0.5rem; font-size: 1rem; }
+  .insight .label { display: inline-block; background: var(--teal); color: white; font-size: 0.72rem; padding: 1px 8px; border-radius: 10px; margin-bottom: 0.6rem; letter-spacing: 0.05em; text-transform: uppercase; }
+  footer { text-align: center; color: #888; font-size: 0.85rem; padding: 2rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BabyMonitor med ESP32-S3</h1>
+  <p>Live video, live lyd og push-to-talk – ingen sky, ingen app, ingen abonnement</p>
+  <a class="repo-link" href="https://github.com/Birdybow/esp32s3-babymonitor" target="_blank">&#128279; GitHub-repository (åpen kildekode)</a>
+</header>
+
+<div class="container">
+
+  <div class="toc">
+    <h3>Innholdsfortegnelse</h3>
+    <ol>
+      <li><a href="#intro">Hva du skal bygge</a></li>
+      <li><a href="#utstyr">Utstyrsliste og kobling</a></li>
+      <li><a href="#arduino">Arduino IDE – oppsett og flash</a></li>
+      <li><a href="#test">Test at det virker</a></li>
+      <li><a href="#chrome">Chrome-flagg for push-to-talk</a></li>
+      <li><a href="#ha">Home Assistant-integrasjon</a></li>
+      <li><a href="#forstaa">Forstå det du bygde</a></li>
+      <li><a href="#hvaannerledes">Hva ville vi gjort annerledes?</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="section" id="intro">
+    <h2><span class="num">1</span> Hva du skal bygge</h2>
+    <p>I denne oppgaven bygger du en selvdriftet babymonitor med <strong>to-veis kommunikasjon</strong>. Alt kjører på ditt lokale nettverk – ingenting sendes til skyen.</p>
+
+    <table>
+      <tr><th>Funksjon</th><th>Teknologi</th><th>Tilgang</th></tr>
+      <tr><td>Live video</td><td>MJPEG over HTTP</td><td><code>http://babymonitor.local/stream</code></td></tr>
+      <tr><td>Live lyd (lytte)</td><td>WAV-strøm over HTTP</td><td><code>http://babymonitor.local:81/audio</code></td></tr>
+      <tr><td>Push-to-talk (snakke)</td><td>Web Audio API → HTTP POST → I2S</td><td><code>http://babymonitor.local:82/player</code></td></tr>
+    </table>
+
+    <div class="arch-box">
+      <span class="port">Port 80</span>  <span class="arrow">→</span>  Video (MJPEG-strøm) <span class="arrow">→</span>  go2rtc <span class="arrow">→</span>  HA-dashboard<br>
+      <span class="port">Port 81</span>  <span class="arrow">→</span>  Lyd ut (WAV-strøm) <span class="arrow">→</span>  nettleser<br>
+      <span class="port">Port 82</span>  <span class="arrow">→</span>  Lyd inn (PCM POST) <span class="arrow">←</span>  nettleser <span class="arrow">→</span>  høyttaler
+    </div>
+
+    <div class="info">
+      <strong>Læringsmål:</strong> Etter denne oppgaven forstår du HTTP-streaming, I2S-lyd, Web Audio API, mDNS, og hvorfor nettlesere krever HTTPS for mikrofontilgang.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="section" id="utstyr">
+    <h2><span class="num">2</span> Utstyrsliste og kobling</h2>
+
+    <h3>Komponenter</h3>
+    <table>
+      <tr><th>Komponent</th><th>Antall</th><th>Merknad</th></tr>
+      <tr><td>Freenove ESP32-S3 WROOM N16R8</td><td>1</td><td>Har innebygd OV5640-kamera og OPI PSRAM</td></tr>
+      <tr><td>INMP441 I2S-mikrofon</td><td>1</td><td>Digital MEMS-mikrofon, 3.3V</td></tr>
+      <tr><td>MAX98357A I2S-forsterker</td><td>1</td><td>Klasse D, 3W, 3.3–5V, mono</td></tr>
+      <tr><td>Liten høyttaler (4–8 Ω)</td><td>1</td><td>Kobles til MAX98357A</td></tr>
+      <tr><td>Breadboard og ledninger</td><td>–</td><td>Hann-hunn og hann-hann</td></tr>
+      <tr><td>USB-C kabel</td><td>1</td><td>Til flashing (høyre USB-C på brettet)</td></tr>
+    </table>
+
+    <h3>Kobling – INMP441 mikrofon</h3>
+    <table class="pin-table">
+      <tr><th>INMP441-pin</th><th>ESP32-S3 GPIO</th><th>Merknad</th></tr>
+      <tr><td>VDD</td><td>3.3V</td><td>Maks 3.6V – aldri 5V!</td></tr>
+      <tr><td>GND</td><td>GND</td><td></td></tr>
+      <tr><td>SCK</td><td>GPIO3</td><td>I2S klokke (BCK)</td></tr>
+      <tr><td>WS</td><td>GPIO21</td><td>Word Select (venstre/høyre)</td></tr>
+      <tr><td>SD</td><td>GPIO1</td><td>Seriedata ut fra mikrofon</td></tr>
+      <tr><td>L/R</td><td>GND</td><td>Velger venstre kanal</td></tr>
+    </table>
+
+    <h3>Kobling – MAX98357A høyttaler</h3>
+    <table class="pin-table">
+      <tr><th>MAX98357A-pin</th><th>ESP32-S3 GPIO</th><th>Merknad</th></tr>
+      <tr><td>VIN</td><td>5V</td><td>Fra USB-pin på brettet</td></tr>
+      <tr><td>GND</td><td>GND</td><td></td></tr>
+      <tr><td>BCLK</td><td>GPIO41</td><td>I2S bit-klokke</td></tr>
+      <tr><td>LRC</td><td>GPIO42</td><td>Left/Right klokke (WS)</td></tr>
+      <tr><td>DIN</td><td>GPIO47</td><td>Seriedata inn til forsterker</td></tr>
+      <tr><td>SD</td><td>–</td><td>La stå ukoblet (aktivert som standard)</td></tr>
+    </table>
+
+    <div class="warn">
+      <strong>Advarsel:</strong> INMP441 tåler maksimalt 3.6V. Bruk alltid 3.3V-pinnen på ESP32-S3, aldri 5V.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="section" id="arduino">
+    <h2><span class="num">3</span> Arduino IDE – oppsett og flash</h2>
+
+    <h3>Arduino IDE-innstillinger</h3>
+    <div class="step"><label><input type="checkbox"><span>Åpne Arduino IDE → <strong>Tools → Board → ESP32 Arduino → ESP32S3 Dev Module</strong></span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Sett <strong>Flash Size</strong> til <code>16MB (128Mb)</code></span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Sett <strong>Partition Scheme</strong> til <code>Huge APP (3MB No OTA / 1MB SPIFFS)</code></span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Sett <strong>PSRAM</strong> til <code>OPI PSRAM</code></span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Sett <strong>USB CDC On Boot</strong> til <code>Disabled</code></span></label></div>
+
+    <h3>Hent koden</h3>
+    <div class="step"><label><input type="checkbox"><span>Last ned koden fra <a href="https://github.com/Birdybow/esp32s3-babymonitor" target="_blank">github.com/Birdybow/esp32s3-babymonitor</a> (klikk <em>Code → Download ZIP</em>)</span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Pakk ut og åpne <code>firmware/BabyMonitor.ino</code> i Arduino IDE</span></label></div>
+
+    <h3>Endre WiFi-innstillinger</h3>
+    <p>Øverst i filen finner du disse to linjene. Endre dem til ditt nettverk:</p>
+    <details>
+      <summary>&#128196; BabyMonitor.ino – WiFi-konfigurasjon</summary>
+      <pre>static const char* WIFI_SSID     = "DITT_WIFI_NAVN";     // ← endre her
+static const char* WIFI_PASS     = "DITT_WIFI_PASSORD";  // ← endre her
+static const char* MDNS_HOSTNAME = "babymonitor";        // http://babymonitor.local</pre>
+    </details>
+
+    <h3>Flash til brettet</h3>
+    <div class="step"><label><input type="checkbox"><span>Koble USB-C-kabelen til <strong>høyre USB-C-port</strong> på Freenove-brettet (CH343 UART-chip)</span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Velg riktig COM-port under <strong>Tools → Port</strong></span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Trykk <strong>Upload</strong> (pil-knappen). Hold BOOT-knappen på brettet nede hvis opplastingen ikke starter automatisk.</span></label></div>
+
+    <div class="warn">
+      <strong>Riktig USB-port er viktig!</strong> Freenove ESP32-S3 har to USB-C-porter. Venstre er native USB (brukes til ESP-IDF), høyre er CH343 UART og brukes til Arduino. Bruk alltid høyre port.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="section" id="test">
+    <h2><span class="num">4</span> Test at det virker</h2>
+
+    <h3>Sjekk seriellmonitor</h3>
+    <p>Åpne <strong>Tools → Serial Monitor</strong> (115200 baud). Du skal se noe slikt:</p>
+    <div class="log-example">╔══════════════════════════╗
+║      BabyMonitor         ║
+╚══════════════════════════╝
+[KAMERA] OK – VGA JPEG
+[MIC] OK – INMP441 16kHz I2S
+[SPK] OK – MAX98357A 16kHz I2S
+[WIFI] OK – IP: 192.168.x.x
+[mDNS] http://babymonitor.local
+[HTTP] Video-server startet på port 80
+[HTTP] Lyd-server startet på port 81
+[HTTP] Tale-server startet på port 82
+
+─── Klar ───────────────────────────
+Video:   http://192.168.x.x/stream
+Spiller: http://192.168.x.x:82/player
+Lyd inn: http://192.168.x.x:81/audio
+Tale ut: http://192.168.x.x:82/speak</div>
+
+    <h3>Test i nettleser</h3>
+    <div class="step"><label><input type="checkbox"><span>Åpne <code>http://babymonitor.local/stream</code> – du skal se live video</span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Åpne <code>http://babymonitor.local:82/player</code> – du skal se lydspeilleren</span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Trykk <strong>Lytt live</strong> – du skal høre lyd fra mikrofonen</span></label></div>
+
+    <div class="success">
+      <strong>Fungerer video og lyd?</strong> Da er fase 1 og 2 fullført. Push-to-talk krever ett ekstra steg i Chrome – se neste avsnitt.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="section" id="chrome">
+    <h2><span class="num">5</span> Chrome-flagg for push-to-talk</h2>
+
+    <p>Chrome blokkerer mikrofontilgang (<code>getUserMedia</code>) på sider som ikke bruker HTTPS. Siden babymonitoren kjører på lokalt nettverk uten sertifikat, må vi eksplisitt godkjenne adressen.</p>
+
+    <div class="step"><label><input type="checkbox"><span>Åpne Chrome og gå til: <code>chrome://flags/#unsafely-treat-insecure-origin-as-secure</code></span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Lim inn <code>http://babymonitor.local:82</code> i feltet og klikk <strong>Enable</strong></span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Klikk <strong>Relaunch</strong> (Chrome starter på nytt)</span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Gå til <code>http://babymonitor.local:82/player</code></span></label></div>
+    <div class="step"><label><input type="checkbox"><span><strong>Hold</strong> den blå mikrofonknappen nede og snakk – du skal høre deg selv i høyttaleren</span></label></div>
+
+    <div class="success">
+      <strong>Gratulerer!</strong> Du har nå full to-veis kommunikasjon: video, lyd og tale – alt over HTTP på lokalt nettverk.
+    </div>
+
+    <div class="info">
+      <strong>Hvorfor krever Chrome HTTPS?</strong> Se avsnitt 7.5 for en grundig forklaring om «secure context» og hva det betyr for IoT-prosjekter.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="section" id="ha">
+    <h2><span class="num">6</span> Home Assistant-integrasjon</h2>
+
+    <h3>Video via go2rtc</h3>
+    <p>go2rtc er en strømmemotor innebygd i Home Assistant. Den henter MJPEG fra ESP32-en og gjør den tilgjengelig som en HA-strøm.</p>
+
+    <div class="step"><label><input type="checkbox"><span>I HA: gå til <strong>Studio Code Server</strong> og åpne <code>/config/go2rtc.yaml</code></span></label></div>
+    <div class="step"><label><input type="checkbox"><span>Legg til:</span></label></div>
+    <details>
+      <summary>&#128196; go2rtc.yaml</summary>
+      <pre>streams:
+  babymonitor_video:
+    - ffmpeg:http://babymonitor.local/stream#video=mjpeg</pre>
+    </details>
+    <div class="step"><label><input type="checkbox"><span>Start HA på nytt (eller kall go2rtc API via Developer Tools)</span></label></div>
+
+    <h3>Dashboard-kort</h3>
+    <div class="step"><label><input type="checkbox"><span>Legg til et <strong>Webpage</strong>-kort i dashboardet med URL:</span></label></div>
+    <details>
+      <summary>&#128196; Video-kort URL</summary>
+      <pre>http://&lt;HA-IP&gt;:11984/stream.html?src=babymonitor_video&amp;mode=mjpeg</pre>
+    </details>
+    <div class="step"><label><input type="checkbox"><span>Legg til enda et <strong>Webpage</strong>-kort for lyd og tale:</span></label></div>
+    <details>
+      <summary>&#128196; Lyd/tale-kort URL</summary>
+      <pre>http://babymonitor.local:82/player</pre>
+    </details>
+
+    <div class="warn">
+      <strong>Merk:</strong> Chrome-flagget du satte i steg 5 gjelder også når HA-dashboardet vises i Chrome. Flagget trenger bare å settes én gang per nettleser.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="section" id="forstaa">
+    <h2><span class="num">7</span> Forstå det du bygde</h2>
+    <p>Denne delen forklarer <em>hvorfor</em> systemet er bygget slik det er. Alle valgene ble tatt av en grunn – og i hvert tilfelle er det en generell lærdom som du kan ta med deg til andre prosjekter.</p>
+
+    <!-- 7.1 -->
+    <h3>7.1 – Hvorfor tre HTTP-servere?</h3>
+    <div class="insight">
+      <div class="label">Bibliotekbegrensning</div>
+      <h4>esp_http_server er entrådet</h4>
+      <p><code>esp_http_server</code> – det innebygde HTTP-biblioteket i ESP32 Arduino-rammeverket – har én enkelt tråd per serverinstans. Når en handler starter, blokkerer den alle andre forespørsler til den er ferdig.</p>
+      <p>MJPEG-strømmingen (video) og WAV-strømmingen (lyd) er aldri ferdige – de holder tilkoblingen åpen så lenge klienten er koblet til. Hvis vi hadde lagt alle endepunkter på samme server, ville aldri <code>/player</code> fått svar.</p>
+      <p><strong>Løsningen:</strong> Tre separate serverinstanser på port 80, 81 og 82. Hver har sin egen tråd og kan ta imot forespørsler uavhengig.</p>
+      <p><strong>Generell lærdom:</strong> Når et bibliotek setter deg i en krok, studer begrensningen og design rundt den – ikke mot den.</p>
+    </div>
+
+    <!-- 7.2 -->
+    <h3>7.2 – Hvorfor sende WAV og ikke rå PCM?</h3>
+    <div class="insight">
+      <div class="label">Elegant design</div>
+      <h4>Endre data slik at verktøyet ikke trenger konfigurasjon</h4>
+      <p>go2rtc bruker ffmpeg til å lese lydkilder. ffmpeg kan lese rå PCM, men da må du spesifisere format eksplisitt i kilde-URL-en:</p>
+      <pre style="margin:0.6rem 0">-f s16le -ar 16000 -ac 1 -i http://babymonitor.local:81/audio</pre>
+      <p>Problemet er at go2rtc sin API ikke alltid aksepterer mellomrom i kilde-strenger. Løsningen var å sende en WAV-header først – da gjenkjenner ffmpeg formatet automatisk og ingen argumenter trengs:</p>
+      <pre style="margin:0.6rem 0">ffmpeg:http://babymonitor.local:81/audio</pre>
+      <p>WAV-headeren er bare 44 bytes og inneholder all informasjon ffmpeg trenger: sample rate, bitdybde, antall kanaler.</p>
+      <p><strong>Generell lærdom:</strong> Når du sliter mot et verktøy, spør deg: kan jeg endre dataene i stedet for konfigurasjonen? Det er ofte mer robust.</p>
+    </div>
+
+    <!-- 7.3 -->
+    <h3>7.3 – Hvorfor push-to-talk og ikke full-duplex?</h3>
+    <div class="insight">
+      <div class="label">Produktbeslutning</div>
+      <h4>Den enklere tekniske løsningen er ofte den bedre produktbeslutningen</h4>
+      <p>Full-duplex lyd – der mikrofon og høyttaler er aktive samtidig – krever <strong>Acoustic Echo Cancellation (AEC)</strong>. Uten AEC vil høyttaleren mate lyd tilbake til mikrofonen, og du hører ekko av deg selv i en evig løkke.</p>
+      <p>AEC på ESP32 er ekstremt krevende å implementere og ville tatt uker å finjustere. Push-to-talk løser problemet elegant: mikrofonen er aktiv kun mens du holder knappen, og høyttaleren er stille i mellomtiden.</p>
+      <p>Push-to-talk er også ærligere mot brukssituasjonen: du vil ha bevisst kontroll over når du snakker til et barn, ikke en åpen kanal som plukker opp alt som skjer i rommet.</p>
+      <p><strong>Generell lærdom:</strong> Teknisk kompleksitet er ikke alltid et tegn på kvalitet. Spør alltid: hva er det faktiske behovet?</p>
+    </div>
+
+    <!-- 7.4 -->
+    <h3>7.4 – Hvorfor stillhetsbuffere rundt avspillingen?</h3>
+    <div class="insight">
+      <div class="label">Profesjonell audioteknikk</div>
+      <h4>DMA-buffere og transientlyder</h4>
+      <p>I2S på ESP32 bruker DMA (Direct Memory Access) til å overføre lyd til høyttaleren. DMA-bufferne fylles kontinuerlig – og hvis det siste som lå i bufferen var lydata, og neste oppdatering plutselig er null, oppstår det en brå overgang som høres som et <em>klikk</em> eller <em>pop</em>.</p>
+      <p>Løsningen er å sende noen frames med stille lyd (<code>0</code>) like før og etter avspillingen. Det gir DMA-bufferne tid til å «lande» mykt.</p>
+      <pre style="margin:0.6rem 0">int16_t silence[64] = {0};
+i2s_write(I2S_NUM_1, silence, sizeof(silence), &amp;written, portMAX_DELAY);
+// ... avspilling ...
+i2s_write(I2S_NUM_1, silence, sizeof(silence), &amp;written, portMAX_DELAY);</pre>
+      <p><strong>Generell lærdom:</strong> Dette er standardteknikken i profesjonelle audiopipelines – fra studio-DAW-er til Bluetooth-høyttalere. Det er ingen hack; det er slik det gjøres.</p>
+    </div>
+
+    <!-- 7.5 -->
+    <h3>7.5 – Hvorfor krever Chrome HTTPS for mikrofontilgang?</h3>
+    <div class="insight">
+      <div class="label">Websikkerhet</div>
+      <h4>Secure context og sensitive API-er</h4>
+      <p>Nettlesere skiller mellom <strong>secure contexts</strong> (HTTPS eller localhost) og usikre (HTTP). Siden 2017 krever en rekke sensitive nettleser-API-er secure context:</p>
+      <ul style="padding-left:1.4rem;margin:0.5rem 0">
+        <li><code>navigator.mediaDevices.getUserMedia()</code> – mikrofon og kamera</li>
+        <li><code>navigator.geolocation</code> – posisjon</li>
+        <li>Service Workers, Web Bluetooth, Web USB</li>
+      </ul>
+      <p>Begrunnelsen er reell: hvis en angriper kan avlytte HTTP-trafikk (<em>man-in-the-middle</em>), kan de injisere kode som stjeler mikrofon- eller kameraopptak. HTTPS forhindrer dette.</p>
+      <h4>For IoT på lokalnett – tre tilnærminger</h4>
+      <table>
+        <tr><th>Tilnærming</th><th>Ulempe</th></tr>
+        <tr><td>Chrome-flagg (det vi brukte)</td><td>Må gjøres per nettleser, kun for utvikling/kontrollerte miljøer</td></tr>
+        <tr><td>Selvsignert sertifikat (self-signed cert)</td><td>Nettleseren viser advarsel, må godkjennes manuelt</td></tr>
+        <tr><td>Let's Encrypt via reverse proxy (f.eks. Nginx)</td><td>Krever domenenavn og port-forwarding – mer komplekst</td></tr>
+      </table>
+      <p><strong>Generell lærdom:</strong> Webplattformens sikkerhetsmodell er designet for offentlig internett og kolliderer ofte med embedded-virkeligheten. Forstå <em>hvorfor</em> regelen finnes – da vet du også når det er OK å omgå den.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="section" id="hvaannerledes">
+    <h2><span class="num">8</span> Hva ville vi gjort annerledes?</h2>
+    <p>En god ingeniør evaluerer sitt eget arbeid kritisk. Her er en ærlig gjennomgang av hva som kunne vært bedre i dette prosjektet:</p>
+
+    <h3>Autentisering</h3>
+    <p>Alle HTTP-endepunktene er åpne for alle på nettverket. Hvem som helst på samme WiFi kan lytte på lydstrømmen eller sende lyd til høyttaleren. For et reelt produkt ville vi lagt til enkel HTTP Basic Auth eller et token-basert system.</p>
+
+    <h3>OTA-oppdateringer (Over The Air)</h3>
+    <p>Vi valgte partisjonsoppsettet «Huge APP» for å få plass til kamera- og lydbibliotekene. Det betyr at OTA-oppdatering ikke er mulig. En fremtidig versjon burde bruke en mindre kjernebibliotek-kombinasjon og aktivere OTA, slik at brettet kan oppdateres uten å koble til USB-kabel.</p>
+
+    <h3>H.264 video i stedet for MJPEG</h3>
+    <p>MJPEG sender hvert bilde som en komprimert JPEG. H.264 er langt mer effektivt (sender bare endringer mellom bilder), men krever hardware-enkoding som ikke er støttet i go2rtc sin standard HA-bygg. MJPEG er enkelt og pålitelig – men bruker mer båndbredde.</p>
+
+    <h3>mDNS-avhengighet</h3>
+    <p>Hele systemet er koblet opp mot <code>babymonitor.local</code> via mDNS. mDNS er ikke alltid pålitelig på tvers av subnett eller på noen WiFi-routere. I produksjon ville vi reservert en fast IP-adresse via DHCP-reservasjon i routeren, og brukt den som backup.</p>
+
+    <h3>Ingen rekobling ved WiFi-tap</h3>
+    <p>Hvis WiFi-forbindelsen mistes, kobler ikke brettet seg til igjen automatisk uten omstart. En robust løsning ville overvåket tilkoblingsstatus i <code>loop()</code> og kalt <code>WiFi.reconnect()</code> ved behov.</p>
+
+    <div class="info">
+      <strong>Poenget:</strong> Alle disse forbeholdene er bevisste avveiinger mellom kompleksitet og nytte for et undervisnings- og hobbyprosjekt. Et ferdig produkt ville løst dem. Å vite hva man <em>ikke</em> har løst er like viktig som å vite hva man har løst.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>Ressurser og videre lesning</h2>
+    <ul style="padding-left:1.4rem;line-height:2.2">
+      <li><a href="https://github.com/Birdybow/esp32s3-babymonitor" target="_blank">GitHub-repository med kildekode og README</a></li>
+      <li><a href="https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/peripherals/i2s.html" target="_blank">Espressif – I2S-driver dokumentasjon</a></li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" target="_blank">MDN – Web Audio API</a></li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts" target="_blank">MDN – Secure Contexts (HTTPS og getUserMedia)</a></li>
+      <li><a href="https://www.home-assistant.io/integrations/go2rtc/" target="_blank">Home Assistant – go2rtc integrasjon</a></li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>
+  Laget av Bård Kjellhov-Reinton – Fagskolen i Viken avd. Kongsberg &nbsp;|&nbsp;
+  Utviklet i samarbeid med Claude (Anthropic) &nbsp;|&nbsp;
+  <a href="https://github.com/Birdybow/esp32s3-babymonitor" target="_blank">Åpen kildekode på GitHub</a>
+</footer>
+
+</body>
+</html>
