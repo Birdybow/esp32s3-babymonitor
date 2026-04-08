@@ -1,8 +1,9 @@
 /**
  * BabyMonitor – Freenove ESP32-S3 WROOM (N16R8)
  * ================================================
- * Video: OV5640 → HTTP MJPEG  på port 80,  GET /stream
- * Lyd:   INMP441 → HTTP PCM   på port 81,  GET /audio
+ * Video:  OV5640  → HTTP MJPEG  på port 80,  GET /stream
+ * Lyd:    INMP441 → HTTP PCM   på port 81,  GET /audio
+ * Servo:  SG90   ← HTTP GET   på port 82,  GET /servo?angle=0..180
  *
  * go2rtc-konfig i HA (/config/go2rtc.yaml):
  * ------------------------------------------
@@ -66,6 +67,17 @@ static const char* MDNS_HOSTNAME = "babymonitor";        // http://babymonitor.l
 #define SPK_LRC   42
 #define SPK_DOUT  47
 
+// ─── Servo-pins og konfigurasjon (SG90) ───────────────────────────────────────
+#define SERVO_PIN      2    // GPIO2 – ledig, PWM-kapabel
+#define SERVO_CHANNEL  1    // LEDC-kanal (0 er i bruk av kamera)
+#define SERVO_FREQ    50    // 50 Hz – standard for RC-servoer
+#define SERVO_RES     16    // 16-bit oppløsning (0–65535)
+// SG90 pulsebredde: 0.5 ms (0°) → 2.4 ms (180°) ved 20 ms periode
+#define SERVO_MIN_DUTY 1638   // 0.5 ms / 20 ms × 65536
+#define SERVO_MAX_DUTY 7864   // 2.4 ms / 20 ms × 65536
+
+static int servo_angle = 90;   // startposisjon: midten
+
 // ─── Lydkonfigurasjon ─────────────────────────────────────────────────────────
 #define AUDIO_SAMPLE_RATE  16000   // Hz – godt nok for stemmer og gråt
 #define AUDIO_BUF_SAMPLES   256   // Samples per I2S-lesning (256 × 4B = 1 kB)
@@ -75,6 +87,25 @@ static const char* MDNS_HOSTNAME = "babymonitor";        // http://babymonitor.l
 // INMP441 sender 24-bit verdi left-justified i 32-bit ord.
 // >> 11 gir god amplitude for tale. Reduser (f.eks. >> 8) hvis lyden er for svak.
 #define MIC_GAIN_SHIFT  11
+
+// =============================================================================
+// SERVO
+// =============================================================================
+
+static void servo_set_angle(int angle) {
+  angle = max(0, min(180, angle));
+  servo_angle = angle;
+  int duty = SERVO_MIN_DUTY + (int)((float)angle / 180.0f * (SERVO_MAX_DUTY - SERVO_MIN_DUTY));
+  ledcWrite(SERVO_CHANNEL, duty);
+}
+
+static bool servo_init() {
+  ledcSetup(SERVO_CHANNEL, SERVO_FREQ, SERVO_RES);
+  ledcAttachPin(SERVO_PIN, SERVO_CHANNEL);
+  servo_set_angle(90);   // senter
+  Serial.println("[SERVO] OK – SG90 GPIO2, startet på 90°");
+  return true;
+}
 
 // ─── HTTP-serverinstanser ─────────────────────────────────────────────────────
 // Tre separate servere – esp_http_server er entrådet, strømmende handlers
@@ -302,12 +333,20 @@ static esp_err_t player_handler(httpd_req_t *req) {
     "  #btnStop{background:#e53935;color:#fff;}"
     "  #btnTale{background:#2196f3;color:#fff;width:160px;height:60px;"
     "           font-size:14px;border-radius:30px;user-select:none;}"
+    "  .pan-row{display:flex;gap:10px;align-items:center;}"
+    "  .pan-row button{padding:12px 18px;font-size:18px;background:#37474f;color:#fff;}"
+    "  #lblAngle{color:#aaa;font-family:sans-serif;font-size:13px;min-width:50px;text-align:center;}"
     "  #status{color:#aaa;font-family:sans-serif;font-size:12px;text-align:center;}"
     "</style></head>"
     "<body>"
     "  <button id='btnPlay' onclick='startLyd()'>&#9654; Lytt live</button>"
     "  <button id='btnStop' onclick='stoppLyd()' disabled>&#9646;&#9646; Stopp</button>"
     "  <button id='btnTale'>&#127908; Hold for tale</button>"
+    "  <div class='pan-row'>"
+    "    <button onclick='pan(-15)'>&#9664;</button>"
+    "    <span id='lblAngle'>90°</span>"
+    "    <button onclick='pan(15)'>&#9654;</button>"
+    "  </div>"
     "  <p id='status'>BabyMonitor – trykk for live lyd</p>"
     "<script>"
     // ── Lytte ──────────────────────────────────────────────────────────────
@@ -373,10 +412,37 @@ static esp_err_t player_handler(httpd_req_t *req) {
     "  bt.addEventListener('mouseleave',stoppTale);"
     "  bt.addEventListener('touchend',stoppTale);"
     "  function st(t){document.getElementById('status').textContent=t;}"
+    // ── Servo pan ───────────────────────────────────────────────────────────
+    "  var panAngle=90;"
+    "  function pan(delta){"
+    "    panAngle=Math.max(0,Math.min(180,panAngle+delta));"
+    "    document.getElementById('lblAngle').textContent=panAngle+'°';"
+    "    fetch('/servo?angle='+panAngle).catch(function(){});"
+    "  }"
     "</script>"
     "</body></html>";
   httpd_resp_set_type(req, "text/html");
   return httpd_resp_sendstr(req, html);
+}
+
+// ── /servo?angle=X – sett servovinkel (0–180) ────────────────────────────────
+static esp_err_t servo_handler(httpd_req_t *req) {
+  httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+
+  char query[32] = {0};
+  if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK) {
+    char val[8] = {0};
+    if (httpd_query_key_value(query, "angle", val, sizeof(val)) == ESP_OK) {
+      int angle = atoi(val);
+      servo_set_angle(angle);
+      Serial.printf("[SERVO] Vinkel satt til %d°\n", servo_angle);
+    }
+  }
+
+  char resp[32];
+  snprintf(resp, sizeof(resp), "{\"angle\":%d}", servo_angle);
+  httpd_resp_set_type(req, "application/json");
+  return httpd_resp_sendstr(req, resp);
 }
 
 // ── /speak OPTIONS – CORS preflight (port 80→82 krever dette) ────────────────
@@ -542,10 +608,12 @@ static void start_servers() {
     httpd_uri_t spk = { "/speak",  HTTP_POST,    speak_handler,         NULL };
     httpd_uri_t opt = { "/speak",  HTTP_OPTIONS, speak_options_handler, NULL };
     httpd_uri_t ply = { "/player", HTTP_GET,     player_handler,        NULL };
+    httpd_uri_t srv = { "/servo",  HTTP_GET,     servo_handler,         NULL };
     httpd_register_uri_handler(speak_server, &spk);
     httpd_register_uri_handler(speak_server, &opt);
     httpd_register_uri_handler(speak_server, &ply);
-    Serial.println("[HTTP] Tale-server startet på port 82 (/speak + /player)");
+    httpd_register_uri_handler(speak_server, &srv);
+    Serial.println("[HTTP] Tale-server startet på port 82 (/speak + /player + /servo)");
   } else {
     Serial.println("[HTTP] FEIL: tale-server feilet å starte");
   }
@@ -577,6 +645,8 @@ void setup() {
     while (true) delay(1000);
   }
 
+  servo_init();   // ikke kritisk – fortsetter selv om servo mangler
+
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   WiFi.setSleep(false);
   Serial.print("[WIFI] Kobler til");
@@ -599,6 +669,7 @@ void setup() {
   Serial.printf("Spiller: http://%s:82/player\n",    WiFi.localIP().toString().c_str());
   Serial.printf("Lyd inn: http://%s:81/audio\n",    WiFi.localIP().toString().c_str());
   Serial.printf("Tale ut: http://%s:82/speak\n",    WiFi.localIP().toString().c_str());
+  Serial.printf("Servo:   http://%s:82/servo?angle=90\n", WiFi.localIP().toString().c_str());
   Serial.println("────────────────────────────────────────");
 }
 
