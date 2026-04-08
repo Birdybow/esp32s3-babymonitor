@@ -129,6 +129,73 @@ Port 81  — audio_server  — /audio  (blocking WAV stream)
 Port 82  — speak_server  — /player (HTML UI), /speak (POST PCM → speaker)
 ```
 
+```mermaid
+flowchart LR
+    subgraph ESP32-S3
+        CAM[OV5640\nCamera]
+        MIC[INMP441\nMicrophone]
+        SPK[MAX98357A\nSpeaker]
+        P80[Port 80\nvideo_server]
+        P81[Port 81\naudio_server]
+        P82[Port 82\nspeak_server]
+        CAM --> P80
+        MIC --> P81
+        P82 --> SPK
+    end
+
+    subgraph Home Assistant
+        go2rtc[go2rtc]
+        dash[Dashboard]
+        P80 -->|MJPEG| go2rtc
+        go2rtc -->|iframe| dash
+    end
+
+    subgraph Browser
+        vid[Video card]
+        player[Audio/PTT player]
+        go2rtc --> vid
+        P81 -->|WAV stream| player
+        player -->|POST PCM| P82
+        P82 -->|HTML UI| player
+    end
+```
+
+---
+
+## Latency
+
+| Stream | Typical delay |
+|--------|--------------|
+| Video (MJPEG via go2rtc) | 1–3 seconds |
+| Audio (WAV stream in browser) | ~0.5 seconds |
+| Push-to-talk (browser → speaker) | ~0.3 seconds |
+
+MJPEG latency is dominated by go2rtc buffering. Direct MJPEG (`http://babymonitor.local/stream`) is faster but not embeddable in HA dashboards without go2rtc.
+
+---
+
+## Known Limitations
+
+This is a hobby and educational project. Be aware of the following before deploying it:
+
+- **No encryption** — all streams are plain HTTP on the local network
+- **No authentication** — anyone on the same WiFi can access the video, audio, and speaker
+- **MJPEG is bandwidth-heavy** — not suitable for remote access over mobile data
+- **No acoustic echo cancellation (AEC)** — you will hear yourself if audio is playing while you push to talk
+- **Not a certified product** — not suitable as a sole safety device for infants
+
+---
+
+## Tested With
+
+| Component | Version |
+|-----------|---------|
+| Home Assistant OS | 2026.4.0 |
+| go2rtc (built into HA) | 1.9.x |
+| Arduino IDE | 2.x |
+| ESP32 Arduino core | 3.x |
+| Chrome | 134+ |
+
 ---
 
 ## Background
