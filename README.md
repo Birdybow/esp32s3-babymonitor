@@ -139,6 +139,10 @@ If you find it useful or build on it — great!
 
 ---
 
+## Credits
+
+Built by **Bård Kjellhov-Reinton**, teacher at Fagskolen i Viken avd. Kongsberg, as part of a Home Assistant and IoT course. Developed together with Claude (Anthropic) through an iterative process of building, hitting walls, and figuring it out.
+
 ## License
 
 MIT
