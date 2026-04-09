@@ -119,6 +119,31 @@ http://babymonitor.local:82/player
 
 ---
 
+## 3D Printed Enclosure
+
+The `hardware/` folder contains a `.3mf` file (Bambu Lab format) for a wall-mounted enclosure designed around the SG90 servo pan mechanism.
+
+**Design concept:** The SG90 servo is fixed to the wall. The bowl-shaped enclosure (containing the ESP32-S3, microphone, and speaker) rotates around the servo horn, giving 180° horizontal pan.
+
+**Print settings used:**
+| Setting | Value |
+|---------|-------|
+| Printer | Bambu Lab |
+| Filament | PLA |
+| Layer height | 0.2 mm |
+| Infill | 15% |
+| Supports | No |
+
+**Assembly notes:**
+- Glue the SG90 plastic horn wings to the bottom of the bowl
+- Mount the servo body to the wall — the enclosure rotates around it
+- Route cables (USB-C power, speaker wires) with enough slack for full 180° rotation
+- SG90 requires a **separate 5V power supply** — the ESP32-S3 board's 5V pin only delivers ~4.1V which is insufficient
+
+> The `.3mf` file opens in Bambu Studio and most modern slicers (PrusaSlicer, OrcaSlicer).
+
+---
+
 ## Architecture
 
 Three separate HTTP servers are required because `esp_http_server` is single-threaded. The MJPEG stream handler on port 80 holds the connection permanently — if `/player` were also on port 80, it would never receive a response.
